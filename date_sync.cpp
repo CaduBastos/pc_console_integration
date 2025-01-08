@@ -19,35 +19,45 @@ int main(){
 
         auto now = std::chrono::system_clock::now();
         std::time_t current_time = std::chrono::system_clock::to_time_t(now); //conversão de timestamp para segundos
-
         std::tm* local_time = std::localtime(&current_time);
 
         //"(&KW122010102111500A9)";
-
+      
         //Aquisição e armazenamento da data e hora do PC
         std::string year = std::to_string(1900 + local_time->tm_year);
         year = year.substr(year.size() -2);
+        std::cout << year << std::endl;
 
         std::string month = std::to_string(1 + local_time->tm_mon);
-        month.resize(2, '0');
-
+        if(month.length() < 2)
+            month.insert(0, "0");
+        std::cout << month << std::endl;
+        
         std::string day = std::to_string(local_time->tm_mday);
-        day.resize(2, '0');
+        if(day.length() < 2)
+            day.insert(0, "0");
+        std::cout << day << std::endl;
 
         std::string hour = std::to_string(local_time->tm_hour);
-        hour.resize(2, '0');
+        if(hour.length() < 2)
+            hour.insert(0, "0"); 
+        std::cout << hour << std::endl;
 
         std::string min = std::to_string(local_time->tm_min);
-        min.resize(2, '0');
+        if(min.length() < 2)
+            min.insert(0, "0");
+        std::cout << min << std::endl;
 
         std::string sec = std::to_string(local_time->tm_sec);
-        sec.resize(2, '0');
+        if(sec.length() < 2)
+            sec.insert(0, "0");
+        std::cout << sec << std::endl;
 
         std::string msg = "(&KW1" +
                         year +
                         month +
                         day +
-                        "0" + std::to_string(local_time->tm_wday) + 
+                        "0" + std::to_string(local_time->tm_wday + 1) + 
                         hour +
                         min +
                         sec +

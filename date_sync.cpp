@@ -26,32 +26,26 @@ int main(){
         //Aquisição e armazenamento da data e hora do PC
         std::string year = std::to_string(1900 + local_time->tm_year);
         year = year.substr(year.size() -2);
-        std::cout << year << std::endl;
 
         std::string month = std::to_string(1 + local_time->tm_mon);
         if(month.length() < 2)
             month.insert(0, "0");
-        std::cout << month << std::endl;
         
         std::string day = std::to_string(local_time->tm_mday);
         if(day.length() < 2)
             day.insert(0, "0");
-        std::cout << day << std::endl;
 
         std::string hour = std::to_string(local_time->tm_hour);
         if(hour.length() < 2)
             hour.insert(0, "0"); 
-        std::cout << hour << std::endl;
 
         std::string min = std::to_string(local_time->tm_min);
         if(min.length() < 2)
             min.insert(0, "0");
-        std::cout << min << std::endl;
 
         std::string sec = std::to_string(local_time->tm_sec);
         if(sec.length() < 2)
-            sec.insert(0, "0");
-        std::cout << sec << std::endl;
+            sec.insert(0, "0");  
 
         std::string msg = "(&KW1" +
                         year +
@@ -107,10 +101,10 @@ int main(){
         //Mensagem a ser enviada
         //const char* msg = "(&KW122010102111500A9)";
         if(send(sock, msg.c_str(), msg.size(), 0) == SOCKET_ERROR){
-            std::cerr << "Erro ao enviar a mensagem. ERROR CODE: " << WSAGetLastError() << std::endl;
+            std::cerr << "Erro ao enviar a mensagem! ERROR CODE: " << WSAGetLastError() << std::endl;
         }
         else{
-            std::cout << "Comando enviado com sucesso. MESSAGE: " << msg << std::endl; 
+            std::cout << "Comando enviado com sucesso! MESSAGE: " << msg << std::endl; 
         }
         closesocket(sock);     //Fechar o socket
         WSACleanup();          //Finalizar winsock  

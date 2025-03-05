@@ -104,13 +104,25 @@ int main(){
             std::cerr << "Erro ao enviar a mensagem! ERROR CODE: " << WSAGetLastError() << std::endl;
         }
         else{
-            std::cout << "Comando enviado com sucesso! MESSAGE: " << msg << std::endl; 
+            std::cout << "TX: " << msg << std::endl; 
         }
+        
+        char buffer[1024]; //Buffer para armazenar o retorno
+        int bytesReceived = recv(sock, buffer, sizeof(buffer)-1, 0);
+    
+        if(bytesReceived > 0){
+            buffer[bytesReceived] = '\0'; //Adiciona o caractere terminador da string
+            std::cout << "RX: " << buffer << std::endl;
+        }else if (bytesReceived == 0){
+            std::cout << "Conexão encerrada pelo servidor" << std::endl;
+        }else{
+            std::cerr << "Erro na recepção: " << WSAGetLastError() << std::endl;
+        }
+        
         closesocket(sock);     //Fechar o socket
         WSACleanup();          //Finalizar winsock  
+        return 0;
     }
-    Sleep(4000);
-    return 0;
 }
 //Função para cálculo do checksum de soma de caracteres
 std::string calc_checksum(std::string msg){

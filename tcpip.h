@@ -19,18 +19,27 @@
 #include <iostream>
 #endif
 
-SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#ifndef TCPIP_H
+#define TCPIP_H
+bool start_winsock();
+bool connect_to_server(char ip_address[], int port);
+bool send_msg(std::string msg);
+std::string rcv_msg(void);
+bool close_socket();
+#endif
+
+SOCKET sock;
 
 // Start winsock
 bool start_winsock(void){
     WSADATA WSAData; // Struct to store winsock version informations
-    if(WSAStartup(MAKEWORD(2, 2), &WSAData) != 0){
-        std::cerr << "Fail to start Winsock! ERROR CODE: " << WSAGetLastError() << std::endl;
-        return 1; // Fail to start Windosck
-    }
+    if(WSAStartup(MAKEWORD(2, 2), &WSAData) != 0)
+        return 1; // Fail to start Winsock
+    
+    sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
     // Create socket
     if(sock == INVALID_SOCKET){ 
-        std::cerr << "Fail to create socket! ERROR CODE: " << WSAGetLastError() << std::endl;
         WSACleanup();
         return 1; // Fail to create socket
     }
@@ -44,7 +53,6 @@ bool connect_to_server(char ip_address[], int port){
     serverAddress.sin_port = htons(port);
     serverAddress.sin_addr.s_addr = inet_addr(ip_address);
     if(connect(sock, (SOCKADDR*)&serverAddress, sizeof(serverAddress))==SOCKET_ERROR){
-        std::cerr << "Failed to connect! ERROR CODE: " << WSAGetLastError() << std::endl;
         closesocket(sock);
         WSACleanup();
         return 1; // Connection failed
@@ -53,26 +61,26 @@ bool connect_to_server(char ip_address[], int port){
 }
 
 bool send_msg(std::string msg){
-    if(send(sock, msg.c_str(), msg.size(), 0)==SOCKET_ERROR){
-        std::cerr << "Failed to send message. ERROR CODE: " << WSAGetLastError() << std::endl;
+    if(send(sock, msg.c_str(), msg.size(), 0)==SOCKET_ERROR)
         return 1;
-    }else  
+    else  
         return 0;
 }
 
-short int rcv_msg(){
+std::string rcv_msg(void){
     char buffer[1024]; // Buffer to store message received
     int bytesReceived = recv(sock, buffer, sizeof(buffer)-1, 0);
 
     if(bytesReceived > 0){
         buffer[bytesReceived] = '\0'; // insert terminator char
-        return 0;
+        return "0";
     }else if (bytesReceived==0){
-        return 1; // Connection closed by the server
+        return "1"; // Connection closed by the server
     }else{
-        std::cerr << "Error on receptio. ERROR CODE: " << WSAGetLastError << std::endl;
-        return 2; // Error on reception
+        std::cerr << "Error on reception. ERROR CODE: " << WSAGetLastError << std::endl;
+        return "2"; // Error on reception
     }  
+    return buffer;
 }
 
 // Close socket

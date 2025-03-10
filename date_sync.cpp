@@ -9,13 +9,15 @@
 #include <chrono>
 #include <windows.h>
 
+#include "tcpip.h"
+
 std::string calc_checksum(std::string msg);
 
 //#pragma comment(lib, "ws2_32.lib") //Link winsock library
 
 int main(){
 
-    if(true){
+    while(true){
 
         auto now = std::chrono::system_clock::now();
         std::time_t current_time = std::chrono::system_clock::to_time_t(now); //conversão de timestamp para segundos
@@ -61,67 +63,32 @@ int main(){
         char ip_address[] = "192.168.0.92";
         int port = 1771;
 
-        //Leitura do IP e porta
-        std::cout << "IP do console: ";
+        // Leitura do IP e porta
+        std::cout << "IP: ";
         std::cin >> ip_address;
-        std::cout << "Porta de conexao: ";
+        std::cout << "Port: ";
         std::cin >> port; 
-    
-        WSADATA WSAData;        //Estrutura para armazenar informações sobre a versão do winsock
-        //Inicializa a winsock
-        if(WSAStartup(MAKEWORD(2, 2), &WSAData) != 0){ //Solicita a versão do winsock2
-            std::cerr << "Falha ao inicilizar Winsock. ERROR CODE: " << WSAGetLastError() << std::endl; 
-            return 1; 
-        }
-                    
-        //criar socket
-        SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-        if(sock == INVALID_SOCKET){
-            std::cerr << "Erro ao criar socket. ERROR CODE: " << WSAGetLastError() << std::endl;
-            WSACleanup();
-            return 1;
-        }
 
-        //Configura endereço do servidor
-        sockaddr_in serverAddress;
-        serverAddress.sin_family = AF_INET; //Configura para IPV4
-        serverAddress.sin_port = htons(port);
-        serverAddress.sin_addr.s_addr = inet_addr(ip_address);
+        if(start_winsock()==0){
+            std::cout << "Winsock started with success" << std::endl;
+        }else
+            std::cerr << "Fail to create socket! ERROR CODE: " << WSAGetLastError() << std::endl;
 
-        //Conecta ao servidor
-        if(connect(sock, (SOCKADDR*)&serverAddress, sizeof(serverAddress)) == SOCKET_ERROR){
-            std::cerr << "Erro ao conectar com a automacao. ERROR CODE: " << WSAGetLastError() << std::endl;
-            closesocket(sock);
-            WSACleanup();
-            return 1;
-        }
-
-        std::cout << "Conexao estabelecida com " << ip_address << ":" << port << std::endl;
-
-        //Mensagem a ser enviada
-        //const char* msg = "(&KW122010102111500A9)";
-        if(send(sock, msg.c_str(), msg.size(), 0) == SOCKET_ERROR){
-            std::cerr << "Erro ao enviar a mensagem! ERROR CODE: " << WSAGetLastError() << std::endl;
-        }
-        else{
-            std::cout << "TX: " << msg << std::endl; 
-        }
+        if(connect_to_server(ip_address, port)==0){
+            std::cout << "Connection established to " << ip_address << ":" << port << std::endl;
+        }else
+            std::cerr << "Connection to server failed! ERROR CODE: " << WSAGetLastError() << std::endl;
         
-        char buffer[1024]; //Buffer para armazenar o retorno
-        int bytesReceived = recv(sock, buffer, sizeof(buffer)-1, 0);
-    
-        if(bytesReceived > 0){
-            buffer[bytesReceived] = '\0'; //Adiciona o caractere terminador da string
-            std::cout << "RX: " << buffer << std::endl;
-        }else if (bytesReceived == 0){
-            std::cout << "Conexão encerrada pelo servidor" << std::endl;
-        }else{
-            std::cerr << "Erro na recepção: " << WSAGetLastError() << std::endl;
-        }
+        // Mensagem a ser enviada
+        // Const char* msg = "(&KW122010102111500A9)";
+        if(send_msg(msg)==0)
+            std::cout << "Message sended! MESSAGE: " << msg << std::endl;
+        else
+            std::cerr << "Failed to send message. ERROR CODE: " << WSAGetLastError() << std::endl;
 
-        closesocket(sock);     //Fechar o socket
-        WSACleanup();          //Finalizar winsock  
-        return 0;
+        // Recepção
+        //char buffer[1024] = rcv_msg();
+        close_socket();   
     }
 }
 //Função para cálculo do checksum de soma de caracteres

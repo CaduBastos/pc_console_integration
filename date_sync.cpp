@@ -118,7 +118,7 @@ int main(){
         }else{
             std::cerr << "Erro na recepção: " << WSAGetLastError() << std::endl;
         }
-        
+
         closesocket(sock);     //Fechar o socket
         WSACleanup();          //Finalizar winsock  
         return 0;

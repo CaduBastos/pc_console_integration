@@ -11,7 +11,7 @@
 #define INCLUDE_LIBS
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <iostream>
+#include <cstring>
 #endif
 
 #ifndef STREAM
@@ -67,20 +67,18 @@ bool send_msg(std::string msg){
         return 0;
 }
 
-std::string rcv_msg(void){
-    char buffer[1024]; // Buffer to store message received
-    int bytesReceived = recv(sock, buffer, sizeof(buffer)-1, 0);
-
-    if(bytesReceived > 0){
-        buffer[bytesReceived] = '\0'; // insert terminator char
-        return "0";
-    }else if (bytesReceived==0){
-        return "1"; // Connection closed by the server
+int rcv_msg(char* buffer, size_t buffer_size){
+    memset(buffer, 0, buffer_size); // Clean the buffer
+    ssize_t bytesReceived = recv(sock, buffer, buffer_size, 0);
+    
+    if(bytesReceived == 0)
+        return 0; // Connection closed by the server
+    else if(bytesReceived > 0){
+        buffer[bytesReceived] = '\0'; // Insert terminator char
+        return bytesReceived; // Return number of bytes received
     }else{
-        std::cerr << "Error on reception. ERROR CODE: " << WSAGetLastError << std::endl;
-        return "2"; // Error on reception
-    }  
-    return buffer;
+        return -1; // Error on reception
+    }
 }
 
 // Close socket

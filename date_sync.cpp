@@ -1,4 +1,3 @@
-//#include <iostream>
 #include <iomanip> // Para std::hex e std::setfill
 #include <sstream> // Para std::ostringstream
 
@@ -60,9 +59,12 @@ int main(){
     char ip_address[] = "192.168.0.92";
     int port = 1771;
 
-    // Leitura do IP e porta
+    std::cout << "Date Sync V1.0" << std::endl;
+
+    // Leitura do IP e porta 
     std::cout << "IP: ";
     std::cin >> ip_address;
+
     std::cout << "Port: ";
     std::cin >> port; 
 
@@ -78,24 +80,24 @@ int main(){
     
     // Envio da mensagem
     // Const char* msg = "(&KW122010102111500A9)";
-    if(send_msg(msg) == 0)
+    if(send_msg(msg) == 0){
         std::cout << "Message sended! TX:" << msg << std::endl;
-    else
+        
+        // Recepção da mensagem 
+        ssize_t rcv_status = rcv_msg(rcv_buffer, sizeof(rcv_buffer));      
+        if(rcv_status == 0)
+            std::cout << "Connection closed by the server!" << std::endl;
+        else if(rcv_status == -1)
+            std::cout << "Error on reception! ERROR CODE: " << WSAGetLastError() << std::endl;
+        else         
+            std::cout << "Received message! RX:" << rcv_buffer << std::endl;        
+    }else
         std::cerr << "Fail to send message! ERROR CODE: " << WSAGetLastError() << std::endl;
-    
-    // Recepção da mensagem 
-    ssize_t rcv_status = rcv_msg(rcv_buffer, sizeof(rcv_buffer));      
-    if(rcv_status == 0)
-        std::cout << "Connection closed by the server!" << std::endl;
-    else if(rcv_status == -1)
-        std::cout << "Error on reception! ERROR CODE: " << WSAGetLastError() << std::endl;
-    else         
-        std::cout << "Received message! RX:" << rcv_buffer << std::endl;      
+
     std::cout << "Press enter to exit" << std::endl;
     std::cin.ignore();
     std::cin.get(); // Aguarda o usuário pressionar enter   
     close_socket(); 
-
 }
 //Função para cálculo do checksum de soma de caracteres
 std::string calc_checksum(std::string msg){

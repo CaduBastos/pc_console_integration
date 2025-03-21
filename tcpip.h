@@ -24,7 +24,7 @@
 bool start_winsock();
 bool connect_to_server(char ip_address[], int port);
 bool send_msg(std::string msg);
-std::string rcv_msg(void);
+int rcv_msg(char* buffer, size_t buffer_size);
 bool close_socket();
 #endif
 
